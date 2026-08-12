@@ -44,7 +44,7 @@ const buildOptions = {
   outfile,
   platform: 'browser',
   target: ['es2020'],
-  sourcemap: true,
+  sourcemap: !process.env.VERCEL,
   logLevel: 'info',
   // viem/noble touch Node's Buffer at module init — inject browser polyfill
   inject: [path.join(root, 'scripts/esbuild-shims.js')],

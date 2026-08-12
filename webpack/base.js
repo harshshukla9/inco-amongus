@@ -86,6 +86,9 @@ module.exports = {
         process.env.INCO_IMPOSTOR_COUNT ||
           String(incoDeploy.impostorCount || 1)
       ),
+      "process.env.SOCKET_URL": JSON.stringify(
+        process.env.SOCKET_URL || ""
+      ),
     }),
     new HtmlWebpackPlugin({
       template: "./index.html"

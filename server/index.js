@@ -1,9 +1,26 @@
 const app = require('express')();
 const http = require('http').Server(app);
+
+const DEFAULT_ORIGINS = [
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+  'https://inco-amongus.onrender.com',
+];
+const corsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const allowedOrigins = corsOrigins.length ? corsOrigins : DEFAULT_ORIGINS;
+
 const io = require('socket.io')(http, {
   cors: {
-    origins: ['http://localhost:8080'],
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
   },
+});
+
+app.get('/health', (_req, res) => {
+  res.status(200).json({ ok: true, service: 'amongjs-server' });
 });
 
 const MEETING_DISCUSS_MS = 15000;
@@ -688,6 +705,8 @@ io.on('connection', (socket) => {
   });
 });
 
-http.listen(3000, () => {
-  console.log('server listening on localhost:3000');
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => {
+  console.log(`server listening on port ${PORT}`);
+  console.log('cors origins:', allowedOrigins.join(', '));
 });

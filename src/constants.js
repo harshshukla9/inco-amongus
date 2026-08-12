@@ -13,7 +13,15 @@ export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
 export const DEFAULT_BOT_COUNT = 6;
 export const MAX_PLAYERS = 1 + DEFAULT_BOT_COUNT;
-export const SOCKET_URL = 'http://localhost:3000';
+// Build-time: SOCKET_URL env, else production Render host, else local server
+export const SOCKET_URL =
+  (typeof process !== 'undefined' && process.env && process.env.SOCKET_URL) ||
+  (typeof window !== 'undefined' && window.__SOCKET_URL__) ||
+  (typeof window !== 'undefined' &&
+  window.location &&
+  /localhost|127\.0\.0\.1/.test(window.location.hostname)
+    ? 'http://localhost:3000'
+    : 'https://inco-amongus.onrender.com');
 export const KILL_RANGE = 90;
 export const KILL_COOLDOWN_MS = 12000;
 export const MEETING_DISCUSS_MS = 15000;
