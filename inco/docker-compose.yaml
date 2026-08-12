@@ -1,0 +1,12 @@
+# Local Inco node — package versions must match @inco/lightning@1.0.2
+services:
+  anvil:
+    image: inconetwork/local-node-anvil-mainnet:v1.0.2
+    ports:
+      - "8545:8545"
+  covalidator:
+    image: inconetwork/local-node-covalidator-mainnet:v1.0.2
+    depends_on:
+      - anvil
+    ports:
+      - "8082:8082"

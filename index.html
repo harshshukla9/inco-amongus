@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Barely Among JS</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse at center, #151028 0%, #05040c 70%);
+      }
+      #game-root {
+        width: 100%;
+        height: 100%;
+      }
+      canvas {
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-root"></div>
+    <!-- Built by `npm run build:inco` (esbuild). Must load before the webpack game bundle. -->
+    <script>
+      // Query string defeats browser cache — a stale bundle silently breaks Inco decrypt
+      document.write(
+        '<script src="/static/inco.bundle.js?v=' +
+          Date.now() +
+          '" onerror="console.error(\'[inco] failed to load /static/inco.bundle.js — run npm run build:inco\')"><\/script>'
+      );
+    </script>
+    <script>
+      if (!window.AmongUsInco || typeof window.AmongUsInco.isIncoConfigured !== 'function') {
+        console.error('[inco] AmongUsInco global missing after bundle load (check console for Buffer/runtime errors)');
+      } else {
+        console.info('[inco] ready build', window.__INCO_BUILD__, window.AmongUsInco.INCO_CONFIG);
+      }
+    </script>
+  </body>
+</html>

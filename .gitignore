@@ -1,0 +1,12 @@
+node_modules
+server/node_modules
+inco/node_modules
+inco/cache
+inco/artifacts
+inco/ignition/deployments
+.inco-deploy.json
+.env
+inco/.env
+static/inco.bundle.js
+static/inco.bundle.js.map
+distinco/.env.local
