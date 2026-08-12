@@ -5,6 +5,7 @@ const DEFAULT_ORIGINS = [
   'http://localhost:8080',
   'http://127.0.0.1:8080',
   'https://inco-amongus.onrender.com',
+  'https://inco-amongus.vercel.app',
 ];
 const corsOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
