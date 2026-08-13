@@ -1,13 +1,19 @@
-# Among Us Roles (Inco)
+# Inco contracts — Among Us roles + impostor market
 
-Confidential Impostor/Crewmate assignment using [ConfidentialDeck](https://docs.inco.org/games/overview) on Inco Lightning.
+Hardhat workspace for confidential roles and the prediction market. Game-level docs live in the [root README](../README.md).
 
-## Role encoding
+## Contracts
 
-After `assignRoles()`, each player peeks their handle:
+| Contract | Role |
+|----------|------|
+| `AmongUsRoles` | Open match, join, FHE shuffle + deal, peek, public reveal |
+| `ConfidentialDeck` | `e.shuffledRange` / deal / reveal / verify attestation |
+| `ImpostorMarketFactory` | One `ImpostorMarket` per `matchId` |
+| `ImpostorMarket` | Encrypted picks, parimutuel ETH pot, settle, claim, refund |
 
-- `value <= impostorCount` → **Impostor**
-- otherwise → **Crewmate**
+Role encoding: `value <= impostorCount` → Impostor, else Crewmate.
+
+Market: no paying self-bets; picks stay encrypted until a winner proves; `abandon()` after 6h refunds everyone.
 
 ## Setup
 
@@ -17,32 +23,45 @@ npm install
 npm run compile
 ```
 
-### Local node
+### Local Inco / Anvil
 
 ```bash
 npm run node:up
 npm run deploy:local
-npm run node:down   # when done
+npm run deploy:market:local
+npm run node:down
 ```
 
 ### Base Sepolia
 
 ```bash
-cp .env.example .env   # set PRIVATE_KEY_BASE_SEPOLIA
+cp .env.example .env.local   # PRIVATE_KEY + BASE_SEPOLIA_RPC_URL
 npm run deploy:testnet
+npm run deploy:market:testnet
 ```
 
-Copy the deployed address into the game root `.env` / webpack define:
+Both deploy scripts write `../.inco-deploy.json` (gitignored). Rebuild the client (`npm run build:inco` from repo root) so addresses are baked into `static/inco.bundle.js`.
 
+## Match flow
+
+1. Host `openMatch(seats)`
+2. Each wallet `join()` (idempotent, no FHE)
+3. Host `assignRoles{value: deckFee(n)}` — shuffle + deal
+4. Client `attestedDecrypt(myRoleHandle)`
+5. On eject / settle: `revealRole(who)` then attested reveal + `e.verifyDecryption`
+
+## Market flow
+
+1. After roles are assigned: `createMarket(matchId, candidates)`
+2. `bet(ciphertext)` with `msg.value >= MIN_STAKE + betFee()`
+3. `lockBetting` when the final vote starts
+4. `settle(impostor, roleValue, signatures)`
+5. Winners: `revealMyPick` → `proveWin` (3 minute window on new deploys)
+6. `finalize` then `claim`
+
+E2E helpers (need a funded deployer key):
+
+```bash
+npx hardhat run scripts/e2e-market.ts --network baseSepolia
+npx hardhat run scripts/e2e-payout.ts --network baseSepolia
 ```
-INCO_ROLES_ADDRESS=0x...
-INCO_NETWORK=baseSepolia   # or local
-```
-
-## Flow
-
-1. Host calls `openMatch(n)` with `msg.value >= deckFee(n)`
-2. Each human wallet calls `join()`
-3. Anyone calls `assignRoles()`
-4. Frontend `peekMyCards` on `myRoleHandle()`
-5. On eject, host/client calls `revealRole(address)` then `readRevealed`
